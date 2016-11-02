@@ -20,8 +20,13 @@ namespace MusicLovers.Controllers
         {
             var upcomingGigs = _context.Gigs.Include(g => g.Artist).Include(g => g.Genre)
                 .Where(g => g.DateTime > DateTime.Now);   //include for eagerloading navigation property..
-            var viewModel = new HomeViewModel { UpcomingGigs = upcomingGigs, ShowActions = User.Identity.IsAuthenticated };
-            return View(viewModel);
+            var viewModel = new HomeViewModel
+            {
+                UpcomingGigs = upcomingGigs,
+                ShowActions = User.Identity.IsAuthenticated,
+                Heading = "Upcoming Gigs"
+            };
+            return View("Gigs", viewModel);
         }
 
         public ActionResult About()
