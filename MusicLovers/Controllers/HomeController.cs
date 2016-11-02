@@ -1,4 +1,5 @@
 ﻿using MusicLovers.Models;
+using MusicLovers.ViewModels;
 using System;
 using System.Data.Entity;
 using System.Linq;
@@ -19,7 +20,8 @@ namespace MusicLovers.Controllers
         {
             var upcomingGigs = _context.Gigs.Include(g => g.Artist).Include(g => g.Genre)
                 .Where(g => g.DateTime > DateTime.Now);   //include for eagerloading navigation property..
-            return View(upcomingGigs);
+            var viewModel = new HomeViewModel { UpcomingGigs = upcomingGigs, ShowActions = User.Identity.IsAuthenticated };
+            return View(viewModel);
         }
 
         public ActionResult About()
