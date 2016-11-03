@@ -19,7 +19,7 @@ namespace MusicLovers.Controllers
         public ActionResult Index()
         {
             var upcomingGigs = _context.Gigs.Include(g => g.Artist).Include(g => g.Genre)
-                .Where(g => g.DateTime > DateTime.Now);   //include for eagerloading navigation property..
+                .Where(g => g.DateTime > DateTime.Now && !g.IsCanceled);   //include for eagerloading navigation property..
             var viewModel = new HomeViewModel
             {
                 UpcomingGigs = upcomingGigs,

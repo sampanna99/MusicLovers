@@ -21,7 +21,8 @@ namespace MusicLovers.Controllers
         public ActionResult Mine()
         {
             var userId = User.Identity.GetUserId();
-            var gigs = _context.Gigs.Where(g => g.ArtistId == userId && g.DateTime > DateTime.Now).Include(g => g.Genre).ToList();
+            var gigs = _context.Gigs.Where(g => g.ArtistId == userId && g.DateTime > DateTime.Now && !g.IsCanceled)
+                .Include(g => g.Genre).ToList();
             return View(gigs);
 
         }
@@ -45,9 +46,50 @@ namespace MusicLovers.Controllers
         [Authorize]
         public ActionResult Create()
         {
-            var viewModel = new GigFormViewModel { Genres = _context.Genres.ToList() };
-            return View(viewModel);
+            var viewModel = new GigFormViewModel { Genres = _context.Genres.ToList(), Heading = "Add a Gig" };
+            return View("GigForm", viewModel);
         }
+
+        [Authorize]
+        public ActionResult Edit(int id)
+        {
+            var userId = User.Identity.GetUserId();
+            var gig = _context.Gigs.Single(g => g.Id == id && g.ArtistId == userId);
+            var viewModel = new GigFormViewModel
+            {
+                Genres = _context.Genres.ToList(),
+                Date = gig.DateTime.ToString("d MMM yyyy"),
+                Time = gig.DateTime.ToString("HH:mm"),
+                Genre = gig.GenreId,
+                Venue = gig.Venue,
+                Heading = "Edit a Gig",
+                Id = gig.Id
+            };
+            return View("GigForm", viewModel);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Update(GigFormViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                viewModel.Genres = _context.Genres.ToList();
+                return View("GigForm", viewModel);
+            }
+            //var artist = _context.Users.Single(u => u.Id == artistId);
+            //var genre = _context.Genres.Single(g => g.Id == viewModel.Genre);
+            var userId = User.Identity.GetUserId();
+            var gig = _context.Gigs.Single(g => g.Id == viewModel.Id && g.ArtistId == userId);
+            gig.Venue = viewModel.Venue;
+            gig.DateTime = viewModel.GetDateTime();
+            gig.GenreId = viewModel.Genre;
+            _context.SaveChanges();
+
+            return RedirectToAction("Mine", "Gigs");
+        }
+
 
         [Authorize]
         [HttpPost]
@@ -57,7 +99,7 @@ namespace MusicLovers.Controllers
             if (!ModelState.IsValid)
             {
                 viewModel.Genres = _context.Genres.ToList();
-                return View("Create", viewModel);
+                return View("GigForm", viewModel);
             }
             //var artist = _context.Users.Single(u => u.Id == artistId);
             //var genre = _context.Genres.Single(g => g.Id == viewModel.Genre);

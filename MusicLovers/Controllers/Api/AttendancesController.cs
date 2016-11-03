@@ -4,7 +4,7 @@ using MusicLovers.Models;
 using System.Linq;
 using System.Web.Http;
 
-namespace MusicLovers.Controllers
+namespace MusicLovers.Controllers.Api
 {
     [Authorize]
     public class AttendancesController : ApiController
